@@ -66,8 +66,11 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        working-directory: temp_app
-        run: flutter build apk --release
+        run: |
+           cd temp_app
+           flutter clean
+           flutter pub get
+           flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
