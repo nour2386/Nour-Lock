@@ -1,0 +1,21 @@
+name: nour_app
+description: "Nour App - Voice controlled screen locker"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_speech_to_text: ^1.2.1
+  audioplayers: ^5.0.0
+  flutter_background_service_plus_android: ^6.3.1
+  permission_handler: ^11.0.0
+  flutter_local_notifications: ^17.2.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/G.mp3
