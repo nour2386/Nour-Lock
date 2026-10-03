@@ -1,0 +1,71 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: stable
+
+      - name: Create Flutter project
+        run: flutter create --org com.nour --project-name nour_app temp_app
+
+      - name: Copy pubspec
+        run: cp source/pubspec.yaml temp_app/pubspec.yaml
+
+      - name: Copy lib
+        run: cp -r source/lib/* temp_app/lib/
+
+      - name: Copy assets
+        run: |
+          mkdir -p temp_app/assets
+          cp source/assets/* temp_app/assets/ 2>/dev/null || true
+
+      - name: Copy AndroidManifest
+        run: cp source/AndroidManifest.xml temp_app/android/app/src/main/AndroidManifest.xml
+
+      - name: Copy Kotlin files
+        run: |
+          cp source/MainActivity.kt temp_app/android/app/src/main/kotlin/com/nour/nour_app/MainActivity.kt
+          cp source/MyDeviceAdminReceiver.kt temp_app/android/app/src/main/kotlin/com/nour/nour_app/MyDeviceAdminReceiver.kt
+
+      - name: Copy device_admin.xml
+        run: |
+          mkdir -p temp_app/android/app/src/main/res/xml
+          cp source/device_admin.xml temp_app/android/app/src/main/res/xml/device_admin.xml
+
+      - name: Copy app icon
+        run: |
+          cp source/ic_launcher.png temp_app/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp source/ic_launcher.png temp_app/android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp source/ic_launcher.png temp_app/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp source/ic_launcher.png temp_app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp source/ic_launcher.png temp_app/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+      - name: Set minSdkVersion
+        run: |
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/' temp_app/android/app/build.gradle
+
+      - name: Get dependencies
+        working-directory: temp_app
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: temp_app
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nour-app-apk
+          path: temp_app/build/app/outputs/flutter-apk/app-release.apk
